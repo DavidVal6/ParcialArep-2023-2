@@ -4,6 +4,8 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class HttpServer {
 
@@ -71,7 +73,7 @@ public class HttpServer {
                 + "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "    <body>\n" +
-                "        <h1>" + output + "</h1>\n" +
+                "        " + output + "\n" +
                 "    </body>\n" +
                 "</html>";
     }
@@ -94,15 +96,35 @@ public class HttpServer {
 
     public static String classTypeInput(String command) {
         String className = command.substring(6, command.length() - 1);
-        String declaredMethods ="Declared methods "+ className.getClass().getDeclaredMethods().toString();
-        String declaredField ="Declared Field"+ className.getClass().getDeclaredFields().toString();
-        String output = declaredMethods + " " + declaredField;
+        String output = "Declared Methods : ";
+        Method[] declaredMethods = null;
+        try {
+            declaredMethods = Class.forName(className).getDeclaredMethods();
+            for(Method m : declaredMethods){
+                output += ", " + m + "\r\n"; 
+            }
+        } catch (SecurityException | ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Field[] declaredField = null;
+        output += " \n Declared Fields: ";
+        try {
+            declaredField =Class.forName(className).getDeclaredFields();
+            for(Field m : declaredField){
+                output+= ", " + m;
+            }
+        } catch (SecurityException | ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return output;
     }
 
     public static String invokeTypeInput(String command) {
-        String brute = command.split("(")[1];
-        String className = brute.substring(1, brute.length() - 1);
+        
+        String brute = command.substring(7, command.length() - 1);
+        String className = brute.split(",")[0];
         System.out.println(className);
         return "aaaaaaaaaaaaa";
     }
