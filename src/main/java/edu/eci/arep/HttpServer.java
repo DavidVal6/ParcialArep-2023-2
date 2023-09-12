@@ -1,6 +1,8 @@
 package edu.eci.arep;
 
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.*;
 
 public class HttpServer {
@@ -16,9 +18,9 @@ public class HttpServer {
 
         Socket clientSocket = null;
         boolean running = true;
-        //String inputLine, outputLine;
-        //PrintWriter out = ;
-        //BufferedReader in;
+        // String inputLine, outputLine;
+        // PrintWriter out = ;
+        // BufferedReader in;
         while (running) {
             try {
                 System.out.println("Listo para recibir ...");
@@ -31,26 +33,27 @@ public class HttpServer {
                     clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-            String inputLine, outputLine,uriS = null;
+            String inputLine, outputLine;
+            String uriS = null;
             boolean fline = true;
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Recibí: " + inputLine);
-                if(fline){
+                if (fline) {
                     uriS = inputLine.split(" ")[1];
+                    System.out.println(uriS);
                     fline = false;
                 }
                 if (!in.ready()) {
                     break;
                 }
             }
-            if(uriS.startsWith("/hello")){
+            if (uriS.startsWith("/consulta")) {
                 outputLine = getResponse(uriS);
-            }
-            else if(uriS.startsWith("/helloPost")){
+            } else if (uriS.startsWith("/consultaPost")) {
                 outputLine = getResponse(uriS);
+            } else {
+                outputLine = homeIndex();
             }
-
-            outputLine = homeIndex();
             out.println(outputLine);
             out.close();
             in.close();
@@ -58,9 +61,64 @@ public class HttpServer {
         clientSocket.close();
         serverSocket.close();
     }
-    
-    public static String getResponse(String uriS){
-        return "No";
+
+    public static String getResponse(String uriS) {
+        String command = uriS.split("=")[1];
+        String output = getCommand(command);
+        return "HTTP/1.1 200 OK\r\n"
+                + "Content-Type: text/html\r\n"
+                + "\r\n"
+                + "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "    <body>\n" +
+                "        <h1>" + output + "</h1>\n" +
+                "    </body>\n" +
+                "</html>";
+    }
+
+    public static String getCommand(String command) {
+        String output;
+        if (command.startsWith("Class")) {
+            output = classTypeInput(command);
+        } else if (command.startsWith("invoke")) {
+            output = invokeTypeInput(command);
+        } else if (command.startsWith("unaryInvoke")) {
+            output = unaryTypeInput(command);
+        } else if (command.startsWith("binaryInvoke")) {
+            output = binaryInvokeType(command);
+        }else{
+            output = "Querry Not Supported";
+        }
+        return output;
+    }
+
+    public static String classTypeInput(String command) {
+        String className = command.substring(6, command.length() - 1);
+        String declaredMethods ="Declared methods "+ className.getClass().getDeclaredMethods().toString();
+        String declaredField ="Declared Field"+ className.getClass().getDeclaredFields().toString();
+        String output = declaredMethods + " " + declaredField;
+        return output;
+    }
+
+    public static String invokeTypeInput(String command) {
+        String brute = command.split("(")[1];
+        String className = brute.substring(1, brute.length() - 1);
+        System.out.println(className);
+        return "aaaaaaaaaaaaa";
+    }
+
+    public static String unaryTypeInput(String command) {
+        String brute = command.split("(")[1];
+        String className = brute.substring(1, brute.length() - 1);
+        System.out.println(className);
+        return "aaaaaaaaaaaaa";
+    }
+
+    public static String binaryInvokeType(String command) {
+        String brute = command.split("(")[1];
+        String className = brute.substring(1, brute.length() - 1);
+        System.out.println(className);
+        return "aaaaaaaaaaaaa";
     }
 
     public static String homeIndex() {
@@ -91,31 +149,14 @@ public class HttpServer {
                 + "                    document.getElementById(\"getrespmsg\").innerHTML =\n"
                 + "                    this.responseText;\n"
                 + "                }\n"
-                + "                xhttp.open(\"GET\", \"/hello?name=\"+nameVar);\n"
+                + "                xhttp.open(\"GET\", \"/consulta?comando=\"+nameVar);\n"
                 + "                xhttp.send();\n"
                 + "            }\n"
                 + "        </script>\n"
                 + "\n"
-                + "        <h1>Form with POST</h1>\n"
-                + "        <form action=\"/hellopost\">\n"
-                + "            <label for=\"postname\">Name:</label><br>\n"
-                + "            <input type=\"text\" id=\"postname\" name=\"comando\" value=\"John\"><br><br>\n"
-                + "            <input type=\"button\" value=\"Submit\" onclick=\"loadPostMsg(postname)\">\n"
-                + "        </form>\n"
-                + "        \n"
-                + "        <div id=\"postrespmsg\"></div>\n"
-                + "        \n"
-                + "        <script>\n"
-                + "            function loadPostMsg(name){\n"
-                + "                let url = \"/hellopost?name=\" + name.value;\n"
-                + "\n"
-                + "                fetch (url, {method: 'POST'})\n"
-                + "                    .then(x => x.text())\n"
-                + "                    .then(y => document.getElementById(\"postrespmsg\").innerHTML = y);\n"
-                + "            }\n"
-                + "        </script>\n"
                 + "    </body>\n"
                 + "</html>";
         return output;
     }
+
 }
