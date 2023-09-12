@@ -88,7 +88,7 @@ public class HttpServer {
             output = unaryTypeInput(command);
         } else if (command.startsWith("binaryInvoke")) {
             output = binaryInvokeType(command);
-        }else{
+        } else {
             output = "Querry Not Supported";
         }
         return output;
@@ -100,8 +100,8 @@ public class HttpServer {
         Method[] declaredMethods = null;
         try {
             declaredMethods = Class.forName(className).getDeclaredMethods();
-            for(Method m : declaredMethods){
-                output += ", " + m + "\r\n"; 
+            for (Method m : declaredMethods) {
+                output += ", " + m + "\r\n";
             }
         } catch (SecurityException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -110,9 +110,9 @@ public class HttpServer {
         Field[] declaredField = null;
         output += " \n Declared Fields: ";
         try {
-            declaredField =Class.forName(className).getDeclaredFields();
-            for(Field m : declaredField){
-                output+= ", " + m;
+            declaredField = Class.forName(className).getDeclaredFields();
+            for (Field m : declaredField) {
+                output += ", " + m;
             }
         } catch (SecurityException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -122,11 +122,26 @@ public class HttpServer {
     }
 
     public static String invokeTypeInput(String command) {
-        
+
         String brute = command.substring(7, command.length() - 1);
         String className = brute.split(",")[0];
+        String method = brute.split(",")[1];
+        Method methods = null;
+
+        try {
+            try {
+                methods = Class.forName(className).getDeclaredMethod(method);
+            } catch (NoSuchMethodException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } catch (SecurityException | ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        String output = "El metodo: " + method + " " + methods;
         System.out.println(className);
-        return "aaaaaaaaaaaaa";
+        return output;
     }
 
     public static String unaryTypeInput(String command) {
